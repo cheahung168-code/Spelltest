@@ -4,73 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpellBound Champion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6AC5FE; --secondary: #A06AFE; --accent: #FFB347; --bg: #F0F9FF; --success: #4CAF50; }
-        body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        :root { --primary: #6AC5FE; --secondary: #A06AFE; --accent: #FFB347; --bg: #F0F9FF; --success: #4CAF50; --error: #FF5252; }
         
-        .screen { display: none; width: 100%; max-width: 600px; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; }
+        body { font-family: 'Lexend', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        .screen { display: none; width: 100%; max-width: 600px; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeIn 0.5s; }
         .active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Parent & Common UI */
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); width: 100%; text-align: center; }
-        textarea { width: 100%; height: 80px; border: 2px solid #ddd; border-radius: 10px; padding: 10px; margin: 15px 0; box-sizing: border-box; }
+        /* Parent UI */
+        .card { background: white; padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; text-align: center; }
+        textarea { width: 100%; height: 120px; border: 3px solid #eee; border-radius: 15px; padding: 15px; font-size: 1.1rem; margin: 20px 0; box-sizing: border-box; font-family: inherit; }
         
-        .bubbles-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; }
-        .bubble { width: 60px; height: 60px; background: white; border: 4px solid var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 var(--primary); }
+        /* Child UI Phase 1 & 2 */
+        .bubbles-container { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 30px 0; }
+        .bubble { width: 70px; height: 70px; background: white; border: 4px solid var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.2rem; font-weight: 900; cursor: pointer; box-shadow: 0 6px 0 var(--primary); transition: 0.1s; color: #444; }
+        .bubble:active { transform: translateY(4px); box-shadow: none; }
         
-        .speak-btn { background: var(--accent); border: none; border-radius: 50%; width: 70px; height: 70px; font-size: 2rem; cursor: pointer; box-shadow: 0 5px 0 #e6951f; }
+        .input-display { font-size: 3.5rem; letter-spacing: 4px; height: 80px; border-bottom: 5px dashed #ccc; width: 90%; text-align: center; margin: 20px 0; font-weight: 900; color: var(--secondary); transition: color 0.3s; }
 
-        /* Final Revision List */
-        .final-list { width: 100%; margin-top: 10px; max-height: 250px; overflow-y: auto; padding: 10px; }
-        .word-row { display: flex; align-items: center; background: white; margin-bottom: 8px; padding: 12px; border-radius: 15px; gap: 15px; border: 2px solid transparent; }
-        .word-row.active-row { border-color: var(--secondary); background: #fdfaff; transform: scale(1.02); }
-        .mini-speak { background: var(--primary); border: none; border-radius: 50%; width: 40px; height: 40px; color: white; cursor: pointer; }
-        .final-display { flex-grow: 1; font-size: 1.4rem; font-weight: bold; color: var(--secondary); border-bottom: 2px solid #ddd; height: 25px; }
+        .speak-btn { background: var(--accent); border: none; border-radius: 50%; width: 90px; height: 90px; font-size: 3rem; cursor: pointer; box-shadow: 0 7px 0 #e6951f; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
+        .speak-btn:active { transform: translateY(5px); box-shadow: none; }
 
         /* Keypads */
-        .keypad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; margin-top: 10px; }
-        .full-keypad { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; width: 100%; margin-top: 10px; }
-        .key { background: white; border: 2px solid #eee; padding: 12px 0; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #ddd; }
-        .key:active { transform: translateY(2px); box-shadow: none; }
+        .keypad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 100%; margin-top: 20px; }
+        .full-keypad { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; width: 100%; margin-top: 15px; }
+        .key { background: white; border: 2px solid #eee; padding: 15px 0; border-radius: 12px; font-size: 1.3rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 0 #ddd; transition: 0.1s; }
+        .key:active { transform: translateY(3px); box-shadow: none; background: #fcfcfc; }
+        .key-special { background: #FFF3E0; border-color: var(--accent); }
 
-        /* Trophy Styles */
-        #trophy-img { width: 150px; margin: 20px; animation: bounce 1s infinite alternate; }
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+        /* Final Revision List */
+        .final-list { width: 100%; margin-top: 10px; max-height: 280px; overflow-y: auto; padding: 10px; }
+        .word-row { display: flex; align-items: center; background: white; margin-bottom: 10px; padding: 15px; border-radius: 20px; gap: 15px; border: 3px solid transparent; transition: 0.3s; }
+        .word-row.active-row { border-color: var(--secondary); background: #fdfaff; transform: scale(1.02); }
+        .mini-speak { background: var(--primary); border: none; border-radius: 50%; width: 45px; height: 45px; color: white; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+        .final-display { flex-grow: 1; font-size: 1.6rem; font-weight: 800; color: var(--secondary); border-bottom: 3px solid #eee; height: 35px; letter-spacing: 2px; }
 
-        button.primary { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-size: 1.2rem; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        /* Victory */
+        #trophy-img { width: 180px; margin: 30px; animation: trophyBounce 0.6s infinite alternate cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes trophyBounce { from { transform: translateY(0) rotate(-5deg); } to { transform: translateY(-20px) rotate(5deg); } }
+
+        button.primary { background: var(--primary); color: white; border: none; padding: 18px 50px; border-radius: 50px; font-size: 1.4rem; cursor: pointer; font-weight: 900; margin-top: 20px; box-shadow: 0 6px 0 #4ba3db; }
+        button.primary:active { transform: translateY(3px); box-shadow: none; }
     </style>
 </head>
 <body>
 
     <div id="parent-screen" class="screen active">
-        <h1>Parent Dashboard</h1>
+        <h1 style="color: var(--primary); font-size: 2.5rem;">SpellBound</h1>
         <div class="card">
-            <textarea id="word-input" placeholder="Type words here..."></textarea>
-            <button class="primary" onclick="startTest()">Start Revision</button>
+            <p><strong>Parent Mode:</strong> Enter words for the week</p>
+            <textarea id="word-input" placeholder="Enter words like: apple, don't, garden, it's"></textarea>
+            <button class="primary" onclick="startTest()">Let's Play!</button>
         </div>
     </div>
 
     <div id="phase1-screen" class="screen">
+        <h2 style="color: #666;">Step 1: Listen & Learn</h2>
         <button class="speak-btn" onclick="speakCurrentWord()">👂</button>
         <div id="bubbles-area" class="bubbles-container"></div>
-        <button class="primary" onclick="goToPhase2()">OK - Test Me!</button>
+        <button class="primary" style="background: var(--success); box-shadow: 0 6px 0 #3e8e41;" onclick="goToPhase2()">I'm Ready! OK</button>
     </div>
 
     <div id="phase2-screen" class="screen">
+        <h2 style="color: #666;">Step 2: Can you spell it?</h2>
         <button class="speak-btn" onclick="speakCurrentWord()">👂</button>
-        <div id="user-input-view" style="font-size: 3rem; margin: 20px; min-height: 60px; color: var(--secondary); font-weight: 900;"></div>
+        <div id="user-input-view" class="input-display"></div>
         <div id="test-keypad" class="keypad"></div>
     </div>
 
     <div id="summary-screen" class="screen">
-        <h2>🎉 Final Challenge</h2>
+        <h2 style="color: var(--secondary);">The Final Challenge!</h2>
         <div id="final-list-container" class="final-list"></div>
-        <div id="final-keypad" class="full-keypad"></div>
         
+        <div id="keyboard-container" style="width:100%">
+            <div id="final-keypad" class="full-keypad"></div>
+        </div>
+
         <div id="victory-area" style="display:none; text-align:center;">
             <img id="trophy-img" src="https://img.icons8.com/emoji/160/trophy-emoji.png" alt="Trophy">
-            <h1 style="color: var(--accent);">Perfect! You got it!</h1>
-            <button class="primary" onclick="location.reload()">Play Again</button>
+            <h1 style="color: var(--accent); font-size: 2rem;">Perfect! You got it!</h1>
+            <button class="primary" onclick="location.reload()">Start New Test</button>
         </div>
     </div>
 
@@ -79,18 +95,21 @@
         let currentIndex = 0;
         let currentInput = "";
         let finalResults = [];
-        let femaleVoice = null;
+        let ladyVoice = null;
 
-        // Initialize Voice
-        window.speechSynthesis.onvoiceschanged = () => {
+        // Load Voices
+        function loadVoices() {
             const voices = window.speechSynthesis.getVoices();
-            femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha')) || voices[0];
-        };
+            // Try to find a friendly female voice
+            ladyVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Google UK English Female') || v.name.includes('Apple')) || voices[0];
+        }
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
 
         const phonics = {
             'A': 'æ', 'B': 'buh', 'C': 'kuh', 'D': 'duh', 'E': 'eh', 'F': 'fuh', 'G': 'guh', 'H': 'huh', 
             'I': 'ih', 'J': 'juh', 'K': 'kuh', 'L': 'ull', 'M': 'muh', 'N': 'nun', 'O': 'ah', 'P': 'puh', 
-            'Q': 'kwuh', 'R': 'ruh', 'S': 'ssssssss', 'T': 'tuh', 'U': 'uh', 'V': 'vuh', 'W': 'wuh', 'X': 'ks', 
+            'Q': 'kwuh', 'R': 'ruh', 'S': 'ssssssssss', 'T': 'tuh', 'U': 'uh', 'V': 'vuh', 'W': 'wuh', 'X': 'ks', 
             'Y': 'yuh', 'Z': 'zzz'
         };
 
@@ -99,7 +118,7 @@
         function startTest() {
             const input = document.getElementById('word-input').value;
             wordList = input.split(/[ ,]+/).filter(w => w.length > 0).map(w => w.toUpperCase());
-            if (!wordList.length) return alert("Enter words!");
+            if (wordList.length === 0) return alert("Please enter at least one word!");
             currentIndex = 0;
             loadPhase1();
         }
@@ -109,10 +128,13 @@
             const area = document.getElementById('bubbles-area');
             area.innerHTML = '';
             wordList[currentIndex].split('').forEach(char => {
-                const b = document.createElement('div'); b.className = 'bubble'; b.innerText = char;
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                b.innerText = char;
                 b.onclick = () => speak(phonics[char] || char);
                 area.appendChild(b);
             });
+            speakCurrentWord();
         }
 
         function goToPhase2() {
@@ -127,6 +149,7 @@
             currentIndex = 0;
             currentInput = "";
             finalResults = new Array(wordList.length).fill(false);
+            
             const container = document.getElementById('final-list-container');
             container.innerHTML = '';
             
@@ -134,9 +157,14 @@
                 const row = document.createElement('div');
                 row.className = 'word-row';
                 row.id = `row-${idx}`;
-                row.innerHTML = `<button class="mini-speak" onclick="selectRow(${idx})">🔊</button><div class="final-display" id="display-${idx}"></div><div id="status-${idx}">⚪</div>`;
+                row.innerHTML = `
+                    <button class="mini-speak" onclick="selectRow(${idx})">🔊</button>
+                    <div class="final-display" id="display-${idx}"></div>
+                    <div id="status-${idx}" style="font-size:1.5rem">⚪</div>
+                `;
                 container.appendChild(row);
             });
+            
             selectRow(0);
             setupKeypad('final-keypad', true);
         }
@@ -146,31 +174,61 @@
             currentIndex = idx;
             currentInput = "";
             document.querySelectorAll('.word-row').forEach(r => r.classList.remove('active-row'));
-            document.getElementById(`row-${idx}`).classList.add('active-row');
+            const activeRow = document.getElementById(`row-${idx}`);
+            if(activeRow) {
+                activeRow.classList.add('active-row');
+                activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             speak(wordList[idx]);
         }
 
         function setupKeypad(containerId, isFull) {
             const area = document.getElementById(containerId);
             area.innerHTML = '';
-            let letters = isFull ? "QWERTYUIOPASDFGHJKLZXCVBNM".split('') : generateLimitedLetters();
+            
+            let letters;
+            if (isFull) {
+                // QWERTY + Apostrophe
+                letters = "QWERTYUIOPASDFGHJKLZXCVBNM'".split('');
+                area.className = "full-keypad";
+            } else {
+                letters = generateLimitedLetters();
+                area.className = "keypad";
+            }
+            
             letters.forEach(L => {
                 const btn = document.createElement('button');
-                btn.className = 'key'; btn.innerText = L;
+                btn.className = 'key';
+                if(L === "'") btn.classList.add('key-special');
+                btn.innerText = L;
                 btn.onclick = () => handleInput(L, isFull);
                 area.appendChild(btn);
             });
+
+            // Add Backspace
+            const del = document.createElement('button');
+            del.className = 'key';
+            del.style.background = '#FFEBEE';
+            del.innerText = '⌫';
+            del.onclick = () => {
+                currentInput = currentInput.slice(0, -1);
+                const view = isFull ? document.getElementById(`display-${currentIndex}`) : document.getElementById('user-input-view');
+                view.innerText = currentInput;
+            };
+            area.appendChild(del);
         }
 
         function handleInput(letter, isFull) {
             currentInput += letter;
             const target = wordList[currentIndex];
-            const displayId = isFull ? `display-${currentIndex}` : 'user-input-view';
-            document.getElementById(displayId).innerText = currentInput;
+            const display = isFull ? document.getElementById(`display-${currentIndex}`) : document.getElementById('user-input-view');
+            
+            display.innerText = currentInput;
 
             if (currentInput === target) {
                 const praise = praises[Math.floor(Math.random() * praises.length)];
                 speak(praise);
+                
                 setTimeout(() => {
                     if (isFull) {
                         finalResults[currentIndex] = true;
@@ -184,26 +242,33 @@
                     }
                 }, 1000);
             } else if (!target.startsWith(currentInput)) {
-                currentInput = "";
-                document.getElementById(displayId).innerText = "";
+                // Shake effect or red flash
+                display.style.color = 'var(--error)';
+                setTimeout(() => {
+                    currentInput = "";
+                    display.innerText = "";
+                    display.style.color = isFull ? 'var(--secondary)' : 'var(--secondary)';
+                }, 400);
             }
-        }
-
-        function showVictory() {
-            document.getElementById('final-keypad').style.display = 'none';
-            document.getElementById('final-list-container').style.display = 'none';
-            document.getElementById('victory-area').style.display = 'block';
-            speak("Perfect! You got it! You are the champion!");
         }
 
         function generateLimitedLetters() {
-            let letters = [...new Set(wordList[currentIndex].split(''))];
+            let wordLetters = [...new Set(wordList[currentIndex].replace(/[^A-Z]/g, '').split(''))];
+            if(wordList[currentIndex].includes("'")) wordLetters.push("'");
+            
             const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            while(letters.length < 10) {
+            while(wordLetters.length < 9) {
                 let r = alpha[Math.floor(Math.random() * 26)];
-                if(!letters.includes(r)) letters.push(r);
+                if(!wordLetters.includes(r)) wordLetters.push(r);
             }
-            return letters.sort(() => Math.random() - 0.5);
+            return wordLetters.sort(() => Math.random() - 0.5);
+        }
+
+        function showVictory() {
+            document.getElementById('final-list-container').style.display = 'none';
+            document.getElementById('keyboard-container').style.display = 'none';
+            document.getElementById('victory-area').style.display = 'block';
+            speak("Perfect! You got it! You are the champion!");
         }
 
         function showScreen(id) {
@@ -212,9 +277,10 @@
         }
 
         function speak(text) {
+            window.speechSynthesis.cancel(); // Stop current speech
             const msg = new SpeechSynthesisUtterance(text);
-            msg.voice = femaleVoice;
-            msg.rate = 0.7;
+            if(ladyVoice) msg.voice = ladyVoice;
+            msg.rate = 0.7; 
             window.speechSynthesis.speak(msg);
         }
 
